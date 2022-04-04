@@ -19,11 +19,30 @@ export function lazyf<T>(fn: () => Lazy<T>): Lazy<T> {
 // example:
 //     apply( lazy(10) , (x) => lazy(1+x))
 // this will not actually calculate 1+x but it with
-export function apply<U, T>(u: Lazy<U>, fn: (v:U) => T): Lazy<T> {
+// https://en.wikipedia.org/wiki/Monad_(functional_programming)
+export function bind<U, T>(u: Lazy<U>, fn: (v:U) => Lazy<T>): Lazy<T> {
+  if(u.type === "val") {
+    return lazyf( () => fn(u.v) )
+  }
+  return lazyf( () => bind(u.v(), fn) )
+}
+
+// https://en.wikipedia.org/wiki/Functor_(functional_programming)
+export function fmap<U, T>(fn: (v:U) => T, u: Lazy<U>): Lazy<T> {
   if(u.type === "val") {
     return lazyf(() => lazy(fn(u.v)))
   }
-  return lazyf(() => apply(u.v(), fn) )
+  return lazyf( () => fmap(fn, u.v()))
+}
+
+// applicative
+// https://en.wikipedia.org/wiki/Applicative_functor
+export function applicative<T,U>(fn: Lazy<(x: T) => U>, x: Lazy<T>): Lazy<U> {
+  return pure(() => lift(fn)(lift(x)) )
+}
+
+export function pure<U>(x: () => U): Lazy<U>{
+  return lazyf( () => lazy(x()) )
 }
 
 // example that shows "tickv{step}" console.log will only
@@ -44,6 +63,8 @@ export function lift<T>(x: Lazy<T>): T {
   }
   return lift(x.v())
 }
+
+
 
 export function sh<T, U, X>(a: Lazy<T>, b: Lazy<U>, fn: (T, U) => X): Lazy<X>{
   return lazyf(() => {
