@@ -32,7 +32,7 @@ Deno.test("Can multiple 2 lazy values with applicative and functor", () => {
   asserts.assertEquals(lift(mult), 2 * 4);
 });
 
-Deno.test("Lazy doesn't call functions until lifted", () => {
+Deno.test("Lazy doesn't run functions until lifted", () => {
   let count = 0;
   // call will increase count everytime it applies the given function
   // with this we can keep track of excecution of the transofmrations
@@ -41,17 +41,20 @@ Deno.test("Lazy doesn't call functions until lifted", () => {
     return f();
   };
 
-  const a = lazy(2);
-  const b = lazy(4);
+  const aString = lazy("2");
+  const a = bind(aString, (x) => lazy(call(() => parseInt(x))));
+  asserts.assertEquals(count, 0);
   const double = fmap((x) => call(() => x * 2), a);
   asserts.assertEquals(count, 0);
+
+  const b = lazy(4);
   const add = applicative(
-    fmap((x) => (y: number) => call(() => x + y), double),
-    b,
+    fmap((x) => (y: number) => call(() => x + y), b),
+    double,
   );
   asserts.assertEquals(count, 0);
 
   const result = lift(add);
-  asserts.assertEquals(count, 2);
+  asserts.assertEquals(count, 3);
   asserts.assertEquals(result, (2 * 2) + 4);
 });
