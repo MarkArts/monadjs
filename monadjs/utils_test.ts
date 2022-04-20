@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.135.0/testing/asserts.ts";
+import { asserts } from "../deps.ts";
 import { compose } from "./utils.ts";
 
 Deno.test("Compose should be transparent", () => {
@@ -8,5 +8,5 @@ Deno.test("Compose should be transparent", () => {
   const mult = (x: number, y: number) => x * y;
 
   // applying b should result in the same as mult(a,b)
-  assertEquals(compose(mult, a)(b), mult(a, b));
+  asserts.assertEquals(compose(mult, a)(b), mult(a, b));
 });

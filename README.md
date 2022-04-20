@@ -23,3 +23,10 @@ The test code alse contains examples on how to use the monads
 ```
 deno test
 ```
+
+## linting / formating
+
+```
+deno lint
+deno fmt
+```

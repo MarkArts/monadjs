@@ -1,22 +1,22 @@
 // url_test.ts
-import { assertEquals } from "https://deno.land/std@0.135.0/testing/asserts.ts";
+import { asserts } from "../deps.ts";
 import { applicative, fmap, Maybe, maybe, Nothing, Val } from "./maybe.ts";
 import { compose } from "./utils.ts";
 
 Deno.test("Can multiple maybe val with functor", () => {
   const x = maybe(2);
   const multiplied = fmap((y) => y * 2, x);
-  assertEquals(multiplied.type, Val);
+  asserts.assertEquals(multiplied.type, Val);
   if (multiplied.type === Nothing) {
     throw Error("type should be val instead of Nothing");
   }
-  assertEquals(multiplied.val, 4);
+  asserts.assertEquals(multiplied.val, 4);
 });
 
 Deno.test("Can multiple maybe nothing with functor", () => {
   const x = maybe<number>(undefined);
   const _ = fmap((y) => y * 2, x);
-  assertEquals(x.type, Nothing);
+  asserts.assertEquals(x.type, Nothing);
 });
 
 Deno.test("Can multiple 2 maybe values with applicative and functor", () => {
@@ -26,7 +26,7 @@ Deno.test("Can multiple 2 maybe values with applicative and functor", () => {
   if (mult.type === Nothing) {
     throw Error("expected mult to have a value");
   }
-  assertEquals(mult.val, 2 * 4);
+  asserts.assertEquals(mult.val, 2 * 4);
 });
 
 function maybeID(): Maybe<string> {
@@ -58,15 +58,15 @@ Deno.test("Can run example showing how maybe applicative and functor can be used
     );
 
     if (userID.type === Val) {
-      assertEquals(userIDTimesTwo.type, Val);
+      asserts.assertEquals(userIDTimesTwo.type, Val);
 
       if (otherUserID.type == Val) {
-        assertEquals(multiplyOfMaybes.type, Val);
+        asserts.assertEquals(multiplyOfMaybes.type, Val);
       } else {
-        assertEquals(multiplyOfMaybes.type, Nothing);
+        asserts.assertEquals(multiplyOfMaybes.type, Nothing);
       }
     } else {
-      assertEquals(userIDTimesTwo.type, Nothing);
+      asserts.assertEquals(userIDTimesTwo.type, Nothing);
     }
   }
 });
