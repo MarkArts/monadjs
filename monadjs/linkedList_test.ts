@@ -1,6 +1,7 @@
 import { CallCounter } from "./lazy_test.ts";
 import { asserts } from "../deps.ts";
 import {
+  arrayToLinkedList,
   fmap,
   linkedList,
   linkedListToArray,
@@ -9,9 +10,16 @@ import {
   take,
 } from "./linkedList.ts";
 
-Deno.test("linkedListToArray to should convert list to array", () => {
+Deno.test("linkedListToArray should convert list to array", () => {
   const list = linkedList(1, linkedList(2, linkedList(3)));
   asserts.assertEquals(linkedListToArray(list), [1, 2, 3]);
+});
+Deno.test("larrayToLinkedList should convert  array to list", () => {
+  const arr = [1, 2, 3];
+  asserts.assertEquals(
+    arrayToLinkedList(arr),
+    linkedList(1, linkedList(2, linkedList(3))),
+  );
 });
 
 Deno.test("fmap changes the first node", () => {

@@ -42,6 +42,8 @@ export function node<T>(x: T, xs: LinkedList<T>): Node<T> {
 // that signature would match if the funtion would be applied on the head of the node
 // but we want to apply a function on the whole node (containing the tail)
 // to implement map and fold
+// ps: typescript typing is smart enough to recognize that if you change the type of the head
+// the tail returned should also be of that type
 export function fmap<T, U>(
   fn: (x: Node<T>) => Node<U>,
   xs: LinkedList<T>,
@@ -83,14 +85,14 @@ export function linkedListToArray<T>(xs: LinkedList<T>): T[] {
   return [list.val.head, ...linkedListToArray(list.val.tail)];
 }
 
-// export function arrayToLinkedList<T>(xs: T[]): LinkedList<T> {
-//   if (!xs || xs.length <= 0) {
-//     return linkedList(undefined);
-//   }
-//   return xs.reverse().reduce((acc, x) => {
-//     return linkedList(x, acc);
-//   }, linkedList(undefined));
-// }
+export function arrayToLinkedList<T>(xs: T[]): LinkedList<T> {
+  if (!xs || xs.length <= 0) {
+    return emptyLinkedList();
+  }
+  return xs.reverse().reduce((acc, x) => {
+    return linkedList(x, acc);
+  }, emptyLinkedList<T>());
+}
 
 export function lFold<T, U>(
   fn: (acc: U, v: T) => U,
