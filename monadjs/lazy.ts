@@ -48,26 +48,10 @@ export function pure<U>(x: () => U): Lazy<U> {
   return lazyf(() => lazy(x()));
 }
 
-// example that shows "tickv{step}" console.log will only
-// be called when we call `lift` on the lazy value
-// const v = lazy(10)
-// const v2 = apply(v, (x) => { console.log("tickv2");  return x*2 })
-// const v3 = apply(v2, (x) => { console.log("tickv3"); return x.toString() })
-// const v4 = apply(v3,  (x) => { console.log("tickv4"); return `${x}-string` })
-// console.log("no tick")
-// console.log("start unwrapping")
-// console.log(lift(v4))
-
 // lift will unwrap a string of lazy values and return its final value
 export function lift<T>(x: Lazy<T>): T {
   if (x.type === "val") {
     return x.v;
   }
   return lift(x.v());
-}
-
-export function sh<T, U, X>(a: Lazy<T>, b: Lazy<U>, fn: (T, U) => X): Lazy<X> {
-  return lazyf(() => {
-    return lazy(fn(lift(a), lift(b)));
-  });
 }
