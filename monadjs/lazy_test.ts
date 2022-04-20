@@ -14,6 +14,13 @@ export class CallCounter {
   }
 }
 
+Deno.test("Calling a function on a call counter increases it's count", () => {
+  const cc = new CallCounter();
+  asserts.assertEquals(cc.count, 0);
+  cc.call(() => {});
+  asserts.assertEquals(cc.count, 1);
+});
+
 Deno.test("Can multiple lazy val with functor", () => {
   const x = lazy(2);
   const multiplied = fmap((y) => y * 2, x);

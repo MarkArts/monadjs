@@ -98,12 +98,15 @@ export function lFold<T, U>(
   fn: (acc: U, v: T) => U,
   init: U,
   xs: LinkedList<T>,
-): U {
-  const list = lazy.lift(xs);
-  if (list.type === "nothing") {
-    return init;
-  }
-  return lFold(fn, fn(init, list.val.head), list.val.tail);
+): lazy.Lazy<U> {
+  return lazy.fmap((node) => {
+    if (node.type === maybe.Nothing) {
+      return init;
+    }
+    const f = lFold(fn, fn(init, node.val.head), node.val.tail);
+    const l = lazy.lift(f);
+    return l;
+  }, xs);
 }
 
 // export function concat<T>(xs: LinkedList<T>, ys:LinkedList<T>): LinkedList<T>{

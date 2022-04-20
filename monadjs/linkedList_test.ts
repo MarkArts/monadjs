@@ -1,8 +1,10 @@
 import { CallCounter } from "./lazy_test.ts";
+import { lift } from "./lazy.ts";
 import { asserts } from "../deps.ts";
 import {
   arrayToLinkedList,
   fmap,
+  lFold,
   linkedList,
   linkedListToArray,
   map,
@@ -86,4 +88,17 @@ Deno.test("Take should only take first elements and return the rest", () => {
 
   const firstTwo = take(list, 2);
   asserts.assertEquals(linkedListToArray(firstTwo), [1, 2]);
+});
+
+Deno.test("Fold should sum all items in a list with delayed excecution", () => {
+  const cc = new CallCounter();
+  const list = linkedList(
+    1,
+    linkedList(2, linkedList(3, linkedList(4))),
+  );
+
+  const sum = lFold((acc, x) => cc.call(() => acc + x), 0, list);
+  asserts.assertEquals(cc.count, 0);
+  asserts.assertEquals(lift(sum), 10);
+  asserts.assertEquals(cc.count, 4); // 0+1, 1+2, 3+3, 6+4
 });
