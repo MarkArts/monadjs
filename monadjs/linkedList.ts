@@ -21,7 +21,7 @@ export function linkedList<T>(x: T, xs?: LinkedList<T>): LinkedList<T> {
   } else {
     return lazy.lazy(maybe.maybe({
       head: x,
-      tail: lazy.lazy({ type: maybe.Nothing }),
+      tail: emptyLinkedList(),
     }));
   }
 }
@@ -37,37 +37,40 @@ export function node<T>(x: T, xs: LinkedList<T>): Node<T> {
   };
 }
 
-export function map<T, U>(xs: LinkedList<T>, fn: (v: T) => U): LinkedList<U> {
-  return lazy.fmap((listVal) => {
+// Not sure if fmap is the correct name here
+// as the type signature isn't exactly that of fmap, (fn:T (x: T) => U, LinkedList<T>): LinkedList<U>
+// that signature would match if the funtion would be applied on the head of the node
+// but we want to apply a function on the whole node (containing the tail)
+// to implement map and fold
+export function fmap<T, U>(
+  fn: (x: Node<T>) => Node<U>,
+  xs: LinkedList<T>,
+): LinkedList<U> {
+  return lazy.fmap((lazyVal) => {
     return maybe.fmap((maybeVal) => {
-      return node(fn(maybeVal.head), map(maybeVal.tail, fn));
-    }, listVal);
+      return fn(maybeVal);
+    }, lazyVal);
   }, xs);
 }
 
-// export function take<T>(
-//   xs: LinkedList<T>,
-//   i: number,
-// ): [LinkedList<T>, LinkedList<T>] {
-//   function rec(
-//     culm: LinkedList<T>,
-//     xs: LinkedList<T>,
-//     i: number,
-//   ): [LinkedList<T>, LinkedList<T>] {
-//     if (i <= 0) {
-//       return [culm, xs];
-//     }
+export function map<T, U>(xs: LinkedList<T>, fn: (v: T) => U): LinkedList<U> {
+  return fmap((n) => {
+    return node(fn(n.head), map(n.tail, fn));
+  }, xs);
+}
 
-//     const list = lazy.lift(xs);
-//     if (list.type === "nothing") {
-//       return [culm, xs];
-//     }
+export function take<T>(
+  xs: LinkedList<T>,
+  i: number,
+): LinkedList<T> {
+  if (i <= 0) {
+    return emptyLinkedList();
+  }
 
-//     return rec(linkedList(list.val.head, culm), list.val.tail, i - 1);
-//   }
-
-//   return rec(emptyLinkedList, xs, i);
-// }
+  return fmap((n) => {
+    return node(n.head, take(n.tail, i - 1));
+  }, xs);
+}
 
 export function linkedListToArray<T>(xs: LinkedList<T>): T[] {
   const list = lazy.lift(xs);
