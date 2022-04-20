@@ -16,6 +16,14 @@ nix-shell -p env.nix
 
 or install deno (https://deno.land/manual/tools/formatter) yourself
 
+## Run
+
+to run the main.ts examples run:
+
+```
+deno run main.ts
+```
+
 ## Testing
 
 The test code alse contains examples on how to use the monads
