@@ -9,12 +9,15 @@ in
     shellHook = ''
         echo "
             Updating .vscode to point to use nix deno $(which deno)
+            and setup formatting on save
         "
         mkdir -p .vscode
         [ -s .vscode/settings.json ] || echo {} > .vscode/settings.json
         echo "$(jq ".\"deno.path\" |= \"$(which deno)\"" .vscode/settings.json)" > .vscode/settings.json
         echo "$(jq ".\"deno.enable\" |= true" .vscode/settings.json)" > .vscode/settings.json
         echo "$(jq ".\"deno.lint\" |= true" .vscode/settings.json)" > .vscode/settings.json
+        echo "$(jq ".\"deno.defaultFormatter\" |= \"denoland.vscode-deno\"" .vscode/settings.json)" > .vscode/settings.json
+        echo "$(jq ".\"deno.formatOnSave\" |= true" .vscode/settings.json)" > .vscode/settings.json
     '';
 
 }
