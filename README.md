@@ -56,9 +56,9 @@ const add = applicative(
   double,
 );
 
-// add this point neither parseInt, *2 and double+b will have been called yet
+// at this point neither parseInt, *2 and double+b will have been called yet
 // after lifing the value `add` we will be calculating the actual functions
-// and return the result of the chain of
+// and return the result of the chain of promises
 const result = lift(add);
 ```
 

@@ -35,7 +35,8 @@ Deno.test("Can multiple 2 lazy values with applicative and functor", () => {
 Deno.test("Lazy doesn't run functions until lifted", () => {
   let count = 0;
   // call will increase count everytime it applies the given function
-  // with this we can keep track of excecution of the transofmrations
+  // with this we can keep track of excecution of the functions applied
+  // to the lazy value
   const call = <T>(f: () => T) => {
     count++;
     return f();
