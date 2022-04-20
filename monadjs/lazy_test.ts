@@ -1,6 +1,18 @@
-// url_test.ts
 import { asserts } from "../deps.ts";
 import { applicative, bind, fmap, lazy, lazyf, lift } from "./lazy.ts";
+
+export class CallCounter {
+  count: number;
+
+  constructor() {
+    this.count = 0;
+  }
+
+  call<T>(fn: () => T): T {
+    this.count++;
+    return fn();
+  }
+}
 
 Deno.test("Can multiple lazy val with functor", () => {
   const x = lazy(2);
@@ -33,29 +45,22 @@ Deno.test("Can multiple 2 lazy values with applicative and functor", () => {
 });
 
 Deno.test("Lazy doesn't run functions until lifted", () => {
-  let count = 0;
-  // call will increase count everytime it applies the given function
-  // with this we can keep track of excecution of the functions applied
-  // to the lazy value
-  const call = <T>(f: () => T) => {
-    count++;
-    return f();
-  };
+  const cc = new CallCounter();
 
   const aString = lazy("2");
-  const a = bind(aString, (x) => lazy(call(() => parseInt(x))));
-  asserts.assertEquals(count, 0);
-  const double = fmap((x) => call(() => x * 2), a);
-  asserts.assertEquals(count, 0);
+  const a = bind(aString, (x) => lazy(cc.call(() => parseInt(x))));
+  asserts.assertEquals(cc.count, 0);
+  const double = fmap((x) => cc.call(() => x * 2), a);
+  asserts.assertEquals(cc.count, 0);
 
   const b = lazy(4);
   const add = applicative(
-    fmap((x) => (y: number) => call(() => x + y), b),
+    fmap((x) => (y: number) => cc.call(() => x + y), b),
     double,
   );
-  asserts.assertEquals(count, 0);
+  asserts.assertEquals(cc.count, 0);
 
   const result = lift(add);
-  asserts.assertEquals(count, 3);
+  asserts.assertEquals(cc.count, 3);
   asserts.assertEquals(result, (2 * 2) + 4);
 });
