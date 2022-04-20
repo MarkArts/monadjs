@@ -59,6 +59,9 @@ export function map<T, U>(xs: LinkedList<T>, fn: (v: T) => U): LinkedList<U> {
   }, xs);
 }
 
+// take should also return the tail of the linked list
+// not sure yet how i would accomplish that with fmap
+// or another construct
 export function take<T>(
   xs: LinkedList<T>,
   i: number,
