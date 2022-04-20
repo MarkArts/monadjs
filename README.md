@@ -15,7 +15,7 @@ nix-shell -p env.nix
 ```
 
 This will also configure the `.vscode/settings.json` to enable use the nix
-installed version of deno
+installed version of deno and setup formatting on save
 
 or install deno (https://deno.land/manual/tools/formatter) yourself
 
