@@ -57,6 +57,7 @@ Deno.test("Lazy doesn't run functions until lifted", () => {
   const aString = lazy("2");
   const a = bind(aString, (x) => lazy(cc.call(() => parseInt(x))));
   asserts.assertEquals(cc.count, 0);
+
   const double = fmap((x) => cc.call(() => x * 2), a);
   asserts.assertEquals(cc.count, 0);
 

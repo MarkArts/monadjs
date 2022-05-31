@@ -3,6 +3,7 @@ import { lift } from "./lazy.ts";
 import { asserts } from "../deps.ts";
 import {
   arrayToLinkedList,
+  concat,
   fmap,
   lFold,
   linkedList,
@@ -101,4 +102,63 @@ Deno.test("Fold should sum all items in a list with delayed excecution", () => {
   asserts.assertEquals(cc.count, 0);
   asserts.assertEquals(lift(sum), 10);
   asserts.assertEquals(cc.count, 4); // 0+1, 1+2, 3+3, 6+4
+});
+
+Deno.test("Concat should add two list together with delayed excecution", () => {
+  const cc = new CallCounter();
+  const list = map(
+    linkedList(
+      1,
+      linkedList(2, linkedList(3)),
+    ),
+    (x) => cc.call(() => x + 1),
+  );
+
+  const list2 = map(
+    linkedList(
+      4,
+      linkedList(5),
+    ),
+    (x) => cc.call(() => x + 1),
+  );
+
+  asserts.assertEquals(cc.count, 0);
+  const sum = concat(list, list2);
+  asserts.assertEquals(cc.count, 0);
+  asserts.assertEquals(linkedListToArray(sum), [
+    1 + 1,
+    2 + 1,
+    3 + 1,
+    4 + 1,
+    5 + 1,
+  ]);
+  asserts.assertEquals(cc.count, 5); // 1+1, 1+2, 3+1, 4+1, 5+1
+});
+
+Deno.test("Concat should only excecute the first values of take", () => {
+  const cc = new CallCounter();
+  const list = map(
+    linkedList(
+      1,
+      linkedList(2, linkedList(3)),
+    ),
+    (x) => cc.call(() => x + 1),
+  );
+
+  const list2 = map(
+    linkedList(
+      4,
+      linkedList(5),
+    ),
+    (x) => cc.call(() => x + 1),
+  );
+
+  asserts.assertEquals(cc.count, 0);
+  const sum = concat(list, list2);
+  asserts.assertEquals(cc.count, 0);
+  asserts.assertEquals(linkedListToArray(take(sum, 2)), [
+    1 + 1,
+    2 + 1,
+  ]);
+  asserts.assertEquals(cc.count, 2); // 1+1, 1+2
 });

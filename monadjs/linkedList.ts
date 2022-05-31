@@ -3,7 +3,7 @@ import * as maybe from "./maybe.ts";
 
 // LinkedList<T> is a linked list with a lazy tail
 // this means each element is a value with a "rest" value that is lazy
-// if the LinkedList is nothing it means the end of the list
+// if the LinkedList is Maybe.Nothing it means the end of the list
 export type LinkedList<T> = lazy.Lazy<
   maybe.Maybe<Node<T>>
 >;
@@ -109,24 +109,17 @@ export function lFold<T, U>(
   }, xs);
 }
 
-// export function concat<T>(xs: LinkedList<T>, ys:LinkedList<T>): LinkedList<T>{
-//   return lFold( (acc, x) => {
-//     if (lift(acc.tail).type === Nothing) {
-//       return linkedList(x, ys)
-//     }
-//     return linkedList(x, acc)
-//   }, linkedList(undefined), xs)
-// }
-
-// //partially applied which can use the `applyf` lambda for composing the next infinite list
-// // but typescript can't infere type for: lmap((x) => x*3)(infinite) because `infinite` decides the type of `x`
-// const clmap = <T, U>(fn: (v:T) => U) => (xs: LinkedList<T>): LinkedList<U> => {
-//   if(xs.tail == undefined) {
-//     return linkedList(fn(xs.head))
-//   } else {
-//     return linkedList(fn(xs.head), clmap(fn) (xs.tail))
-//   }
-// }
+export function concat<T>(
+  xs: LinkedList<T>,
+  ys: LinkedList<T>,
+): LinkedList<T> {
+  return lazy.fmap((lazyVal) => {
+    if (lazyVal.type === maybe.Nothing) {
+      return lazy.lift(ys);
+    }
+    return maybe.maybe(node(lazyVal.val.head, concat(lazyVal.val.tail, ys)));
+  }, xs);
+}
 
 // export function lFlatMap<T, U>(xs: LinkedList<T>, fn: (v:T) => U[]): LinkedList<U> {
 //   if(xs.tail == undefined) {
