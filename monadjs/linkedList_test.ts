@@ -4,6 +4,7 @@ import { asserts } from "../deps.ts";
 import {
   arrayToLinkedList,
   concat,
+  flatMap,
   fmap,
   lFold,
   linkedList,
@@ -159,6 +160,31 @@ Deno.test("Concat should only excecute the first values of take", () => {
   asserts.assertEquals(linkedListToArray(take(sum, 2)), [
     1 + 1,
     2 + 1,
+  ]);
+  asserts.assertEquals(cc.count, 2); // 1+1, 1+2
+});
+
+Deno.test("flatmap should flatten array with delayed excecution", () => {
+  const cc = new CallCounter();
+  const list = map(
+    linkedList(
+      1,
+      linkedList(2, linkedList(3)),
+    ),
+    (x) => cc.call(() => x + 1),
+  );
+  asserts.assertEquals(cc.count, 0);
+
+  // [1,2,3] -> [0,1 0,1,2 0,1,2,3]
+  const flat = flatMap(list, (x) => arrayToLinkedList([...Array(x).keys()]));
+  asserts.assertEquals(cc.count, 0);
+
+  asserts.assertEquals(linkedListToArray(take(flat, 5)), [
+    0,
+    1,
+    0,
+    1,
+    2,
   ]);
   asserts.assertEquals(cc.count, 2); // 1+1, 1+2
 });

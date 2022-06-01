@@ -99,66 +99,44 @@ export function lFold<T, U>(
   init: U,
   xs: LinkedList<T>,
 ): lazy.Lazy<U> {
-  return lazy.fmap((node) => {
+  return lazy.bind(xs, (node) => {
     if (node.type === maybe.Nothing) {
-      return init;
+      return lazy.lazy(init);
     }
-    const f = lFold(fn, fn(init, node.val.head), node.val.tail);
-    const l = lazy.lift(f);
-    return l;
-  }, xs);
+    return lFold(fn, fn(init, node.val.head), node.val.tail);
+  });
 }
 
 export function concat<T>(
   xs: LinkedList<T>,
   ys: LinkedList<T>,
 ): LinkedList<T> {
-  return lazy.fmap((lazyVal) => {
+  return lazy.bind(xs, (lazyVal) => {
     if (lazyVal.type === maybe.Nothing) {
-      return lazy.lift(ys);
+      return ys;
     }
-    return maybe.maybe(node(lazyVal.val.head, concat(lazyVal.val.tail, ys)));
-  }, xs);
+    return linkedList(lazyVal.val.head, concat(lazyVal.val.tail, ys));
+  });
 }
 
-// export function lFlatMap<T, U>(xs: LinkedList<T>, fn: (v:T) => U[]): LinkedList<U> {
-//   if(xs.tail == undefined) {
-//     return arrayToLinkedList(fn(xs.head))
-//   } else {
-//     return concat(arrayToLinkedList(fn(xs.head)),sn lFlatMap(xs.tail, fn))
-//   }
-// }
+export function flatten<T>(xss: LinkedList<LinkedList<T>>): LinkedList<T> {
+  function rec(
+    current: LinkedList<LinkedList<T>>,
+    acc: LinkedList<T>,
+  ): LinkedList<T> {
+    return lazy.bind(current, (x) => {
+      if (x.type === maybe.Nothing) {
+        return acc;
+      }
+      return concat(x.val.head, rec(x.val.tail, acc));
+    });
+  }
+  return rec(xss, emptyLinkedList<T>());
+}
 
-// const list = linkedList(
-//   lazy(1),
-//   linkedList(
-//     lazy(2),
-//     linkedList(lazy(3), linkedList(lazy(4), emptyLinkedList)),
-//   ),
-// );
-// console.log(list);
-// const timesTwo = map(list, (x) =>
-//   applyLazy(x, (y) => {
-//     console.log("tick*2");
-//     return y * 2;
-//   }));
-// console.log(timesTwo);
-// const timesTwoAndFour = map(timesTwo, (x) =>
-//   applyLazy(x, (y) => {
-//     console.log("tick*4");
-//     return y * 4;
-//   }));
-// console.log(timesTwoAndFour);
-
-// console.log("take 2");
-// const [first3, rest] = take(timesTwoAndFour, 2);
-// console.log(first3, rest);
-// console.log("Convert first2 to normal array");
-// const arr = linkedListToArray(first3);
-// console.log(arr);
-// // console.log("lift all elemnts in array")
-// // console.log(arr.map(lift))
-
-// const sum = lFold((acc, x) => sh(acc, x, (_a, _b) => _a + _b), lazy(0), first3);
-// console.log(sum);
-// console.log(lift(sum));
+export function flatMap<T, U>(
+  xs: LinkedList<T>,
+  fn: (v: T) => LinkedList<U>,
+): LinkedList<U> {
+  return flatten(map(xs, fn));
+}
