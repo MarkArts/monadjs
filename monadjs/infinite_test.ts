@@ -67,5 +67,5 @@ Deno.test("should be able to sum the first 8 numbers of fibonaci times 2", () =>
   const sum = lFold((acc, c) => cc.call(() => acc + c), 0, take(fib2, 7));
   asserts.assertEquals(cc.count, 0);
   asserts.assertEquals(lift(sum), 40); // sum: [0*2, 1*2, 1*2, 2*2, 3*2, 5*2, 8*2] = [0,2,2,4,6,10,16]
-  asserts.assertEquals(cc.count, 7 * 7);
+  asserts.assertEquals(cc.count, 7 + 7); // TODO: this currently triggers to many calculations
 });
