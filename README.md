@@ -47,12 +47,12 @@ const a = bind(aString, (x) => lazy(parseInt(x)));
 
 // multiple the value by two
 // at this point both parseInt and *2 won't have been called yet
-const double = fmap((x) => call(() => x * 2), a);
+const double = fmap((x) => x * 2, a);
 
 // create a new lazy value and add it to the doubled value
 const b = lazy(4);
 const add = applicative(
-  fmap((x) => (y: number) => call(() => x + y), b),
+  fmap((x) => (y: number) => x + y, b),
   double,
 );
 
