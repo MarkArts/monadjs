@@ -1,4 +1,4 @@
-import { CallCounter } from "./lazy_test.ts";
+import { CallCounter } from "./callCounter.ts";
 import { lift } from "./lazy.ts";
 import { asserts } from "../deps.ts";
 import {

@@ -1,18 +1,6 @@
+import { CallCounter } from "./callCounter.ts";
 import { asserts } from "../deps.ts";
 import { applicative, bind, fmap, lazy, lazyf, lift } from "./lazy.ts";
-
-export class CallCounter {
-  count: number;
-
-  constructor() {
-    this.count = 0;
-  }
-
-  call<T>(fn: () => T): T {
-    this.count++;
-    return fn();
-  }
-}
 
 Deno.test("Calling a function on a call counter increases it's count", () => {
   const cc = new CallCounter();
