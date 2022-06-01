@@ -114,7 +114,7 @@ Deno.test("Test example in Readme", () => {
 
   // The same code without comments and the call counter adding syntax complexity
   const _l = map(arrayToLinkedList([1, 2, 3]), (x) => x * 2);
-  const _inf = map(infinite(0, 1), (x) => cc.call(() => x * 2));
+  const _inf = map(infinite(0, 1), (x) => x * 2);
   const _sum = lFold((acc, x) => acc + x, 0, take(concat(_l, _inf), 5));
   asserts.assertEquals(lift(_sum), 14);
 });
