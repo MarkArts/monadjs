@@ -1,6 +1,6 @@
 # MONADJS
 
-Some typescript code related to monas to help me learn what monads, functors and
+Some typescript code related to monads to help me learn what monads, functors and
 applicatives are.
 
 So far this implements a type-safe infinite list of Fibonacci numbers with the
