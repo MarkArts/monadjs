@@ -1,5 +1,3 @@
-import { compose } from "./utils.ts";
-
 export const nothingType = "nothing";
 export const justType = "just";
 export const nothing = { type: nothingType } as Nothing;

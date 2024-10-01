@@ -10,7 +10,7 @@ import {
   nothingType,
   unit,
 } from "./maybe.ts";
-import { compose, mult } from "./utils.ts";
+import { mult, partial } from "./utils.ts";
 
 Deno.test("should be able to use bind to multiply a value", () => {
   const a = unit(2);
@@ -52,8 +52,7 @@ Deno.test("Example with functor, applicative and functor", () => {
   const a = Math.random() > 0.5 ? unit(2) : nothing;
   const b = Math.random() > 0.5 ? unit(2) : nothing;
 
-  const multiplieByA = fmap((x) => (y: number) => x * y, a);
-  const multiplied = applicative(multiplieByA, b);
+  const multiplied = applicative(fmap((x) => (y: number) => x * y, a), b);
 
   if (multiplied.type === justType) {
     asserts.assertExists(multiplied.val);
@@ -108,7 +107,7 @@ Deno.test("Can run example showing how maybe applicative and functor can be used
     const otherUserIDMumber = fmap(parseInt, otherUserID);
     const multiplyOfMaybes = applicative(
       fmap(
-        (x) => compose(mult)(x), // mult == *
+        (x) => partial(mult)(x), // mult == *
         otherUserIDMumber,
       ),
       userIDNumber,
