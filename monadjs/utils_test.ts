@@ -16,6 +16,7 @@ Deno.test("partial should be transparent", () => {
 Deno.test("compose should be able to simplify applicative", () => {
   const app = partial(applicative);
   const f = partial(fmap);
+
   const myfunction = (x: number, y: number) => {
     return x * 2 * 5 / 20 + y / 5;
   };
