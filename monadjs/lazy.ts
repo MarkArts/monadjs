@@ -46,8 +46,11 @@ export function fmap<T, U>(f: (x: T) => U, x: Lazy<T>): Lazy<U> {
 }
 // applicative
 // https://en.wikipedia.org/wiki/Applicative_functor
-export function applicative<T, U>(f: Lazy<(x: T) => U>, x: Lazy<T>): Lazy<U> {
-  return executeLazy(() => lift(f)(lift(x)));
+export function applicative<T, U>(
+  f: Lazy<(x: T) => U>,
+  x: Lazy<T>,
+): Lazy<U> {
+  return bind(f, (fn) => bind(x, (val) => unit(fn(val))));
 }
 
 export function pure<U>(x: U): Lazy<U> {

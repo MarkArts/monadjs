@@ -10,7 +10,7 @@ import {
   nothingType,
   unit,
 } from "./maybe.ts";
-import { compose } from "./utils.ts";
+import { compose, mult } from "./utils.ts";
 
 Deno.test("should be able to use bind to multiply a value", () => {
   const a = unit(2);
@@ -24,9 +24,9 @@ Deno.test("should be able to use bind to multiply a value", () => {
 });
 
 Deno.test("Example without functor and applicative", () => {
-  const x = Math.random() > 0.5 ? unit(2) : nothing;
-  const y = Math.random() > 0.5 ? unit(2) : nothing;
-  const multiplied = bind(x, (x) => bind(y, (y) => unit(x * y)));
+  const a = Math.random() > 0.5 ? unit(2) : nothing;
+  const b = Math.random() > 0.5 ? unit(2) : nothing;
+  const multiplied = bind(a, (x) => bind(b, (y) => unit(x * y)));
 
   if (multiplied.type === justType) {
     asserts.assertEquals(multiplied.val, 4);
@@ -36,9 +36,25 @@ Deno.test("Example without functor and applicative", () => {
 });
 
 Deno.test("Example with functor and applicative", () => {
-  const x = Math.random() > 0.5 ? unit(2) : nothing;
-  const y = Math.random() > 0.5 ? unit(2) : nothing;
-  const multiplied = applicative(fmap((x) => (y: number) => x * y, x), y);
+  const a = Math.random() > 0.5 ? unit(2) : nothing;
+  const b = Math.random() > 0.5 ? unit(2) : nothing;
+
+  const multiplieByA = fmap((x) => (y: number) => x * y, a);
+  const multiplied = applicative(multiplieByA, b);
+
+  if (multiplied.type === justType) {
+    asserts.assertExists(multiplied.val);
+  } else {
+    asserts.assertEquals(multiplied.type, nothingType);
+  }
+});
+
+Deno.test("Example with functor, applicative and compose", () => {
+  const a = Math.random() > 0.5 ? unit(2) : nothing;
+  const b = Math.random() > 0.5 ? unit(2) : nothing;
+
+  const multiplieByA = fmap(compose(mult), a);
+  const multiplied = applicative(multiplieByA, b);
 
   if (multiplied.type === justType) {
     asserts.assertExists(multiplied.val);
@@ -83,8 +99,6 @@ function maybeID(): Maybe<string> {
   return unit(val);
 }
 
-const mult = (a: number, b: number) => a * b;
-
 Deno.test("Can run example showing how maybe applicative and functor can be used to handle maybes that are randomly nothing", () => {
   for (let i = 0; i < 100; i++) {
     const userID = maybeID(); // 50% chance of returning a string
@@ -95,7 +109,7 @@ Deno.test("Can run example showing how maybe applicative and functor can be used
     const otherUserIDMumber = fmap(parseInt, otherUserID);
     const multiplyOfMaybes = applicative(
       fmap(
-        (x) => compose(mult, x), // mult == *
+        (x) => compose(mult)(x), // mult == *
         otherUserIDMumber,
       ),
       userIDNumber,

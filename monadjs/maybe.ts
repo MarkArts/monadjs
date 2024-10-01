@@ -1,3 +1,5 @@
+import { compose } from "./utils.ts";
+
 export const nothingType = "nothing";
 export const justType = "just";
 export const nothing = { type: nothingType } as Nothing;
@@ -18,6 +20,8 @@ export function bind<T, U>(x: Maybe<T>, f: (x: T) => Maybe<U>): Maybe<U> {
   return f(x.val);
 }
 
+// fmap is a functor that will apply a function to a value inside a Maybe
+// and in turn return that value as a maybe
 export function fmap<T, U>(f: (x: T) => U, x: Maybe<T>): Maybe<U> {
   if (x.type === nothingType) {
     return x;
@@ -34,17 +38,20 @@ export function fmapWithApplicative<T, U>(
   return applicative(unit(f), x);
 }
 
+// applicative is a function that apply the potential
+// value of x to the potential function of f
 export function applicative<T, U>(
   f: Maybe<(x: T) => U>,
   x: Maybe<T>,
 ): Maybe<U> {
-  if (f.type === nothingType) {
-    return f;
-  }
+  return bind(f, (fn) => bind(x, (val) => unit(fn(val))));
+}
 
-  if (x.type === nothingType) {
-    return x;
+// lift will unwrap a value from a maybe
+// returning either undefined or the value
+export function lift<T>(x: Maybe<T>): T | undefined {
+  if (x.type === justType) {
+    return x.val;
   }
-
-  return unit(f.val(x.val));
+  return undefined;
 }
