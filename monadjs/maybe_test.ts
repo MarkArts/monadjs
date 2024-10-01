@@ -6,14 +6,14 @@ import {
   Maybe,
   maybe,
   nothing,
-  something,
+  just,
 } from "./maybe.ts";
 import { compose } from "./utils.ts";
 
 Deno.test("Can multiple maybe val with functor", () => {
   const x = maybe(2);
   const multiplied = fmap((y) => y * 2, x);
-  asserts.assertEquals(multiplied.type, something);
+  asserts.assertEquals(multiplied.type, just);
   if (multiplied.type === nothing) {
     throw Error("type should be val instead of Nothing");
   }
@@ -64,11 +64,11 @@ Deno.test("Can run example showing how maybe applicative and functor can be used
       userIDNumber,
     );
 
-    if (userID.type === something) {
-      asserts.assertEquals(userIDTimesTwo.type, something);
+    if (userID.type === just) {
+      asserts.assertEquals(userIDTimesTwo.type, just);
 
-      if (otherUserID.type == something) {
-        asserts.assertEquals(multiplyOfMaybes.type, something);
+      if (otherUserID.type == just) {
+        asserts.assertEquals(multiplyOfMaybes.type, just);
       } else {
         asserts.assertEquals(multiplyOfMaybes.type, nothing);
       }

@@ -1,15 +1,15 @@
 export const nothing = "nothing";
-export const something = "something";
-export type Something<T> = { type: "something"; val: T };
+export const just = "just";
+export type Just<T> = { type: "just"; val: T };
 export type Nothing = { type: "nothing" };
 
-export type Maybe<T> = Something<T> | Nothing;
+export type Maybe<T> = Just<T> | Nothing;
 
 export function maybe<T>(x: T | undefined): Maybe<T> {
   if (x === undefined) {
     return { type: nothing };
   }
-  return { type: something, val: x };
+  return { type: just, val: x };
 }
 
 export function bind<T, U>(x: Maybe<T>, f: (x: T) => Maybe<U>): Maybe<U> {
