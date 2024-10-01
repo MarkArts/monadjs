@@ -36,18 +36,18 @@ export function executeLazy<T>(fn: () => T): Lazy<T> {
 //     apply( lazy(10) , (x) => lazy(1+x))
 // this will not actually calculate 1+x but will return a promise to calculate 1+x
 // https://en.wikipedia.org/wiki/Monad_(functional_programming)
-export function bind<U, T>(u: Lazy<U>, fn: (v: U) => Lazy<T>): Lazy<T> {
+export function bind<U, T>(u: Lazy<U>, fn: (_: U) => Lazy<T>): Lazy<T> {
   return executeLazy(() => lift(fn(lift(u))));
 }
 
 // https://en.wikipedia.org/wiki/Functor_(functional_programming)
-export function fmap<T, U>(f: (x: T) => U, x: Lazy<T>): Lazy<U> {
+export function fmap<T, U>(f: (_: T) => U, x: Lazy<T>): Lazy<U> {
   return applicative(unit(f), x);
 }
 // applicative
 // https://en.wikipedia.org/wiki/Applicative_functor
 export function applicative<T, U>(
-  f: Lazy<(x: T) => U>,
+  f: Lazy<(_: T) => U>,
   x: Lazy<T>,
 ): Lazy<U> {
   return bind(f, (fn) => bind(x, (val) => unit(fn(val))));

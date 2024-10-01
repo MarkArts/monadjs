@@ -1,5 +1,5 @@
 import { asserts } from "../deps.ts";
-import { mult, partial } from "./utils.ts";
+import { compose, mult, partial } from "./utils.ts";
 
 import { applicative, fmap, lift, unit } from "./lazy.ts";
 
@@ -38,4 +38,16 @@ Deno.test("showcase what partial applying functions is with compose", () => {
   asserts.equal(multiply(a, b), 6);
   asserts.equal(cool(a)(b), 6);
   asserts.equal(cooler(a)(b), 6);
+});
+
+Deno.test("compose should correctly chain a bunch of functions together", () => {
+  const add1times2minus3 = compose(
+    [
+      (x: number) => x + 1,
+      (x: number) => x * 2,
+      (x: number) => x - 3,
+    ],
+  );
+
+  asserts.equal(add1times2minus3(10), 17);
 });

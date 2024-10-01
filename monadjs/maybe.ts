@@ -10,7 +10,7 @@ export function unit<T>(x: T): Maybe<T> {
   return { type: justType, val: x };
 }
 
-export function bind<T, U>(x: Maybe<T>, f: (x: T) => Maybe<U>): Maybe<U> {
+export function bind<T, U>(x: Maybe<T>, f: (_: T) => Maybe<U>): Maybe<U> {
   if (x.type === nothingType) {
     return x;
   }
@@ -20,13 +20,13 @@ export function bind<T, U>(x: Maybe<T>, f: (x: T) => Maybe<U>): Maybe<U> {
 
 // fmap is a functor that will apply a function to a value inside a Maybe
 // and in turn return that value as a maybe
-export function fmap<T, U>(f: (x: T) => U, x: Maybe<T>): Maybe<U> {
+export function fmap<T, U>(f: (_: T) => U, x: Maybe<T>): Maybe<U> {
   return bind(x, (val) => unit(f(val)));
 }
 
 // see: https://en.wikipedia.org/wiki/Applicative_functor
 export function fmapWithApplicative<T, U>(
-  f: (x: T) => U,
+  f: (_: T) => U,
   x: Maybe<T>,
 ): Maybe<U> {
   return applicative(unit(f), x);
@@ -35,7 +35,7 @@ export function fmapWithApplicative<T, U>(
 // applicative is a function that apply the potential
 // value of x to the potential function of f
 export function applicative<T, U>(
-  f: Maybe<(x: T) => U>,
+  f: Maybe<(_: T) => U>,
   x: Maybe<T>,
 ): Maybe<U> {
   return bind(f, (fn) => bind(x, (val) => unit(fn(val))));
