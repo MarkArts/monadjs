@@ -4,14 +4,14 @@ import {
   applicative,
   fmap,
   Maybe,
-  maybe,
+  unit,
   nothing,
   just,
 } from "./maybe.ts";
 import { compose } from "./utils.ts";
 
 Deno.test("Can multiple maybe val with functor", () => {
-  const x = maybe(2);
+  const x = unit(2);
   const multiplied = fmap((y) => y * 2, x);
   asserts.assertEquals(multiplied.type, just);
   if (multiplied.type === nothing) {
@@ -21,14 +21,14 @@ Deno.test("Can multiple maybe val with functor", () => {
 });
 
 Deno.test("Can multiple maybe nothing with functor", () => {
-  const x = maybe<number>(undefined);
+  const x = unit<number>(undefined);
   const _ = fmap((y) => y * 2, x);
   asserts.assertEquals(x.type, nothing);
 });
 
 Deno.test("Can multiple 2 maybe values with applicative and functor", () => {
-  const a = maybe(2);
-  const b = maybe(4);
+  const a = unit(2);
+  const b = unit(4);
   const mult = applicative(fmap((x) => (y: number) => x * y, a), b);
   if (mult.type === nothing) {
     throw Error("expected mult to have a value");
@@ -38,12 +38,12 @@ Deno.test("Can multiple 2 maybe values with applicative and functor", () => {
 
 function maybeID(): Maybe<string> {
   if (Math.random() >= 0.5) {
-    return maybe<string>(undefined);
+    return unit<string>(undefined);
   }
 
   const val = (Math.random() * 100).toString();
 
-  return maybe(val);
+  return unit(val);
 }
 
 const mult = (a: number, b: number) => a * b;

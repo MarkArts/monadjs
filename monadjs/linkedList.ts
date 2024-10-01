@@ -14,12 +14,12 @@ export type Node<T> = {
 
 export function linkedList<T>(x: T, xs?: LinkedList<T>): LinkedList<T> {
   if (xs) {
-    return lazy.lazy(maybe.maybe({
+    return lazy.lazy(maybe.unit({
       head: x,
       tail: xs,
     }));
   } else {
-    return lazy.lazy(maybe.maybe({
+    return lazy.lazy(maybe.unit({
       head: x,
       tail: emptyLinkedList(),
     }));

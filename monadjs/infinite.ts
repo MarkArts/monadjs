@@ -8,7 +8,7 @@ import * as maybe from "./maybe.ts";
 
 export function infinite(start = 0, inc = 1): linkedList.LinkedList<number> {
   return lazy.pure(() =>
-    maybe.maybe(linkedList.node(
+    maybe.unit(linkedList.node(
       start,
       infinite(start + inc, inc),
     ))
@@ -17,7 +17,7 @@ export function infinite(start = 0, inc = 1): linkedList.LinkedList<number> {
 
 export function fibonaci(a = 0, b = 1): linkedList.LinkedList<number> {
   return lazy.pure(() =>
-    maybe.maybe(linkedList.node(
+    maybe.unit(linkedList.node(
       a,
       fibonaci(b, a + b),
     ))

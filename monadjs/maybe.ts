@@ -5,7 +5,7 @@ export type Nothing = { type: "nothing" };
 
 export type Maybe<T> = Just<T> | Nothing;
 
-export function maybe<T>(x: T | undefined): Maybe<T> {
+export function unit<T>(x: T | undefined): Maybe<T> {
   if (x === undefined) {
     return { type: nothing };
   }
@@ -25,7 +25,7 @@ export function fmap<T, U>(f: (x: T) => U, x: Maybe<T>): Maybe<U> {
     return x;
   }
 
-  return maybe(f(x.val));
+  return unit(f(x.val));
 }
 
 export function applicative<T, U>(
@@ -40,5 +40,5 @@ export function applicative<T, U>(
     return x;
   }
 
-  return maybe(f.val(x.val));
+  return unit(f.val(x.val));
 }
