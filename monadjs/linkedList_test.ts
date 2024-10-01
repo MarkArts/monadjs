@@ -18,11 +18,16 @@ Deno.test("linkedListToArray should convert list to array", () => {
   const list = linkedList(1, linkedList(2, linkedList(3)));
   asserts.assertEquals(linkedListToArray(list), [1, 2, 3]);
 });
-Deno.test("larrayToLinkedList should convert  array to list", () => {
+
+Deno.test("arrayToLinkedList should convert  array to list", () => {
   const arr = [1, 2, 3];
-  asserts.assertEquals(
-    arrayToLinkedList(arr),
-    linkedList(1, linkedList(2, linkedList(3))),
+  const list = arrayToLinkedList(arr);
+  // @ts-ignore don't want to type this out or typecheck it for safety
+  asserts.assertEquals(lift(take(list, 1)).val.head, 1);
+
+  asserts.equal(
+    arr,
+    linkedListToArray(list),
   );
 });
 

@@ -14,12 +14,12 @@ export type Node<T> = {
 
 export function linkedList<T>(x: T, xs?: LinkedList<T>): LinkedList<T> {
   if (xs) {
-    return lazy.lazy(maybe.unit({
+    return lazy.unit(maybe.unit({
       head: x,
       tail: xs,
     }));
   } else {
-    return lazy.lazy(maybe.unit({
+    return lazy.unit(maybe.unit({
       head: x,
       tail: emptyLinkedList(),
     }));
@@ -27,7 +27,7 @@ export function linkedList<T>(x: T, xs?: LinkedList<T>): LinkedList<T> {
 }
 
 export function emptyLinkedList<T>(): LinkedList<T> {
-  return lazy.lazy({ type: maybe.nothing });
+  return lazy.unit(maybe.nothing);
 }
 
 export function node<T>(x: T, xs: LinkedList<T>): Node<T> {
@@ -79,7 +79,7 @@ export function take<T>(
 
 export function linkedListToArray<T>(xs: LinkedList<T>): T[] {
   const list = lazy.lift(xs);
-  if (list.type === maybe.nothing) {
+  if (list.type == maybe.nothingType) {
     return [];
   }
   return [list.val.head, ...linkedListToArray(list.val.tail)];
@@ -100,8 +100,8 @@ export function lFold<T, U>(
   xs: LinkedList<T>,
 ): lazy.Lazy<U> {
   return lazy.bind(xs, (node) => {
-    if (node.type === maybe.nothing) {
-      return lazy.lazy(init);
+    if (node.type === maybe.nothingType) {
+      return lazy.unit(init);
     }
     return lFold(fn, fn(init, node.val.head), node.val.tail);
   });
@@ -112,7 +112,7 @@ export function concat<T>(
   ys: LinkedList<T>,
 ): LinkedList<T> {
   return lazy.bind(xs, (lazyVal) => {
-    if (lazyVal.type === maybe.nothing) {
+    if (lazyVal.type === maybe.nothingType) {
       return ys;
     }
     return linkedList(lazyVal.val.head, concat(lazyVal.val.tail, ys));
@@ -125,7 +125,7 @@ export function flatten<T>(xss: LinkedList<LinkedList<T>>): LinkedList<T> {
     acc: LinkedList<T>,
   ): LinkedList<T> {
     return lazy.bind(current, (x) => {
-      if (x.type === maybe.nothing) {
+      if (x.type === maybe.nothingType) {
         return acc;
       }
       return concat(x.val.head, rec(x.val.tail, acc));

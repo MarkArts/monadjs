@@ -1,13 +1,21 @@
 // url_test.ts
 import { asserts } from "../deps.ts";
-import { applicative, fmap, just, Maybe, nothing, unit } from "./maybe.ts";
+import {
+  applicative,
+  fmap,
+  justType,
+  Maybe,
+  nothing,
+  nothingType,
+  unit,
+} from "./maybe.ts";
 import { compose } from "./utils.ts";
 
-Deno.test("Example without functor", () => {
-  const x = unit(Math.random() > 0.5 ? 2 : undefined);
-  if (x.type == just) {
-    const y = unit(Math.random() > 0.5 ? 2 : undefined);
-    if (y.type == just) {
+Deno.test("Example without functor and applicative", () => {
+  const x = Math.random() > 0.5 ? unit(2) : nothing;
+  if (x.type == justType) {
+    const y = Math.random() > 0.5 ? unit(2) : nothing;
+    if (y.type == justType) {
       const multiplied = x.val * y.val;
       asserts.assertExists(multiplied);
     }
@@ -15,38 +23,38 @@ Deno.test("Example without functor", () => {
 });
 
 Deno.test("Exmaple with functor and applicative", () => {
-  const x = unit(Math.random() > 0.5 ? 2 : undefined);
-  const y = unit(Math.random() > 0.5 ? 2 : undefined);
+  const x = Math.random() > 0.5 ? unit(2) : nothing;
+  const y = Math.random() > 0.5 ? unit(2) : nothing;
   const multiplied = applicative(fmap((x) => (y: number) => x * y, x), y);
 
-  if (multiplied.type === just) {
+  if (multiplied.type === justType) {
     asserts.assertExists(multiplied.val);
   } else {
-    asserts.assertEquals(multiplied.type, nothing);
+    asserts.assertEquals(multiplied.type, nothingType);
   }
 });
 
 Deno.test("Can multiple maybe val with functor", () => {
   const x = unit(2);
   const multiplied = fmap((y) => y * 2, x);
-  asserts.assertEquals(multiplied.type, just);
-  if (multiplied.type === nothing) {
+  asserts.assertEquals(multiplied.type, justType);
+  if (multiplied.type === nothingType) {
     throw Error("type should be val instead of Nothing");
   }
   asserts.assertEquals(multiplied.val, 4);
 });
 
 Deno.test("Can multiple maybe nothing with functor", () => {
-  const x = unit<number>(undefined);
+  const x = nothing as Maybe<number>;
   const _ = fmap((y) => y * 2, x);
-  asserts.assertEquals(x.type, nothing);
+  asserts.assertEquals(x.type, nothingType);
 });
 
 Deno.test("Can multiple 2 maybe values with applicative and functor", () => {
   const a = unit(2);
   const b = unit(4);
   const mult = applicative(fmap((x) => (y: number) => x * y, a), b);
-  if (mult.type === nothing) {
+  if (mult.type === nothingType) {
     throw Error("expected mult to have a value");
   }
   asserts.assertEquals(mult.val, 2 * 4);
@@ -54,7 +62,7 @@ Deno.test("Can multiple 2 maybe values with applicative and functor", () => {
 
 function maybeID(): Maybe<string> {
   if (Math.random() >= 0.5) {
-    return unit<string>(undefined);
+    return nothing;
   }
 
   const val = (Math.random() * 100).toString();
@@ -80,16 +88,16 @@ Deno.test("Can run example showing how maybe applicative and functor can be used
       userIDNumber,
     );
 
-    if (userID.type === just) {
-      asserts.assertEquals(userIDTimesTwo.type, just);
+    if (userID.type === justType) {
+      asserts.assertEquals(userIDTimesTwo.type, justType);
 
-      if (otherUserID.type == just) {
-        asserts.assertEquals(multiplyOfMaybes.type, just);
+      if (otherUserID.type == justType) {
+        asserts.assertEquals(multiplyOfMaybes.type, justType);
       } else {
-        asserts.assertEquals(multiplyOfMaybes.type, nothing);
+        asserts.assertEquals(multiplyOfMaybes.type, nothingType);
       }
     } else {
-      asserts.assertEquals(userIDTimesTwo.type, nothing);
+      asserts.assertEquals(userIDTimesTwo.type, nothingType);
     }
   }
 });

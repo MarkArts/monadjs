@@ -9,43 +9,49 @@ export type Lazy<T> = { type: "val"; v: T } | {
 };
 
 // constructor for the value type (so an actual value)
-export function lazy<T>(x: T): Lazy<T> {
-  return { type: "val", v: x };
+export function unit<T>(x: T): Lazy<T> {
+  return {
+    type: "func",
+    v: () => {
+      return { type: "val", v: x };
+    },
+  };
 }
-// constructor for the function type (so a promise to return a value)
-export function lazyf<T>(fn: () => Lazy<T>): Lazy<T> {
-  return { type: "func", v: fn };
+
+export function executeLazy<T>(fn: () => T): Lazy<T> {
+  return {
+    type: "func",
+    v: () => {
+      return {
+        type: "val",
+        v: fn(),
+      };
+    },
+  };
 }
 
 // This is the function that makes lazy a Monad which means we can now chain operations of lazy values
 // In other words this means i can create a promise to apply a function to result of this promise
 // example:
 //     apply( lazy(10) , (x) => lazy(1+x))
-// this will not actually calculate 1+x but it with
+// this will not actually calculate 1+x but will return a promise to calculate 1+x
 // https://en.wikipedia.org/wiki/Monad_(functional_programming)
 export function bind<U, T>(u: Lazy<U>, fn: (v: U) => Lazy<T>): Lazy<T> {
-  if (u.type === "val") {
-    return lazyf(() => fn(u.v));
-  }
-  return lazyf(() => bind(u.v(), fn));
+  return executeLazy(() => lift(fn(lift(u))));
 }
 
 // https://en.wikipedia.org/wiki/Functor_(functional_programming)
-export function fmap<U, T>(fn: (v: U) => T, u: Lazy<U>): Lazy<T> {
-  if (u.type === "val") {
-    return lazyf(() => lazy(fn(u.v)));
-  }
-  return lazyf(() => fmap(fn, u.v()));
+export function fmap<T, U>(f: (x: T) => U, x: Lazy<T>): Lazy<U> {
+  return applicative(unit(f), x);
 }
-
 // applicative
 // https://en.wikipedia.org/wiki/Applicative_functor
-export function applicative<T, U>(fn: Lazy<(x: T) => U>, x: Lazy<T>): Lazy<U> {
-  return pure(() => lift(fn)(lift(x)));
+export function applicative<T, U>(f: Lazy<(x: T) => U>, x: Lazy<T>): Lazy<U> {
+  return executeLazy(() => lift(f)(lift(x)));
 }
 
-export function pure<U>(x: () => U): Lazy<U> {
-  return lazyf(() => lazy(x()));
+export function pure<U>(x: U): Lazy<U> {
+  return unit(x);
 }
 
 // lift will unwrap a string of lazy values and return its final value
