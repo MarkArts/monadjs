@@ -2,6 +2,7 @@
 import { asserts } from "../deps.ts";
 import {
   applicative,
+  bind,
   fmap,
   justType,
   Maybe,
@@ -11,18 +12,30 @@ import {
 } from "./maybe.ts";
 import { compose } from "./utils.ts";
 
-Deno.test("Example without functor and applicative", () => {
-  const x = Math.random() > 0.5 ? unit(2) : nothing;
-  if (x.type == justType) {
-    const y = Math.random() > 0.5 ? unit(2) : nothing;
-    if (y.type == justType) {
-      const multiplied = x.val * y.val;
-      asserts.assertExists(multiplied);
-    }
+Deno.test("should be able to use bind to multiply a value", () => {
+  const a = unit(2);
+  const multiplied = bind(a, (x) => unit(x * 2));
+
+  if (multiplied.type === justType) {
+    asserts.assertEquals(multiplied.val, 4);
+  } else {
+    asserts.assertEquals(multiplied.type, nothingType);
   }
 });
 
-Deno.test("Exmaple with functor and applicative", () => {
+Deno.test("Example without functor and applicative", () => {
+  const x = Math.random() > 0.5 ? unit(2) : nothing;
+  const y = Math.random() > 0.5 ? unit(2) : nothing;
+  const multiplied = bind(x, (x) => bind(y, (y) => unit(x * y)));
+
+  if (multiplied.type === justType) {
+    asserts.assertEquals(multiplied.val, 4);
+  } else {
+    asserts.assertEquals(multiplied.type, nothingType);
+  }
+});
+
+Deno.test("Example with functor and applicative", () => {
   const x = Math.random() > 0.5 ? unit(2) : nothing;
   const y = Math.random() > 0.5 ? unit(2) : nothing;
   const multiplied = applicative(fmap((x) => (y: number) => x * y, x), y);
