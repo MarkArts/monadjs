@@ -35,12 +35,11 @@ Deno.test("Example without functor and applicative", () => {
   }
 });
 
-Deno.test("Example with functor and applicative", () => {
+Deno.test("Example with functor", () => {
   const a = Math.random() > 0.5 ? unit(2) : nothing;
   const b = Math.random() > 0.5 ? unit(2) : nothing;
 
-  const multiplieByA = fmap((x) => (y: number) => x * y, a);
-  const multiplied = applicative(multiplieByA, b);
+  const multiplied = fmap((x) => fmap((y) => x * y, a), b);
 
   if (multiplied.type === justType) {
     asserts.assertExists(multiplied.val);
@@ -49,11 +48,11 @@ Deno.test("Example with functor and applicative", () => {
   }
 });
 
-Deno.test("Example with functor, applicative and compose", () => {
+Deno.test("Example with functor, applicative and functor", () => {
   const a = Math.random() > 0.5 ? unit(2) : nothing;
   const b = Math.random() > 0.5 ? unit(2) : nothing;
 
-  const multiplieByA = fmap(compose(mult), a);
+  const multiplieByA = fmap((x) => (y: number) => x * y, a);
   const multiplied = applicative(multiplieByA, b);
 
   if (multiplied.type === justType) {
