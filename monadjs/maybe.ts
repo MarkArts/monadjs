@@ -28,6 +28,11 @@ export function fmap<T, U>(f: (x: T) => U, x: Maybe<T>): Maybe<U> {
   return unit(f(x.val));
 }
 
+// see: https://en.wikipedia.org/wiki/Applicative_functor
+export function fmap2<T, U>(f: (x: T) => U, x: Maybe<T>): Maybe<U> {
+  return applicative(unit(f), x);
+}
+
 export function applicative<T, U>(
   f: Maybe<(x: T) => U>,
   x: Maybe<T>,

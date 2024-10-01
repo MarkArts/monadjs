@@ -1,14 +1,30 @@
 // url_test.ts
 import { asserts } from "../deps.ts";
-import {
-  applicative,
-  fmap,
-  Maybe,
-  unit,
-  nothing,
-  just,
-} from "./maybe.ts";
+import { applicative, fmap, just, Maybe, nothing, unit } from "./maybe.ts";
 import { compose } from "./utils.ts";
+
+Deno.test("Example without functor", () => {
+  const x = unit(Math.random() > 0.5 ? 2 : undefined);
+  if (x.type == just) {
+    const y = unit(Math.random() > 0.5 ? 2 : undefined);
+    if (y.type == just) {
+      const multiplied = x.val * y.val;
+      asserts.assertExists(multiplied);
+    }
+  }
+});
+
+Deno.test("Exmaple with functor and applicative", () => {
+  const x = unit(Math.random() > 0.5 ? 2 : undefined);
+  const y = unit(Math.random() > 0.5 ? 2 : undefined);
+  const multiplied = applicative(fmap((x) => (y: number) => x * y, x), y);
+
+  if (multiplied.type === just) {
+    asserts.assertExists(multiplied.val);
+  } else {
+    asserts.assertEquals(multiplied.type, nothing);
+  }
+});
 
 Deno.test("Can multiple maybe val with functor", () => {
   const x = unit(2);
