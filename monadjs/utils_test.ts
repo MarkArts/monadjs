@@ -1,7 +1,7 @@
 import { asserts } from "../deps.ts";
 import { compose, mult, partial } from "./utils.ts";
 
-import { applicative, fmap, lift, unit } from "./lazy.ts";
+import { applicative, fmap, lift, unit } from "./maybe.ts";
 
 Deno.test("partial should be transparent", () => {
   const a = 2;
@@ -16,14 +16,16 @@ Deno.test("partial should be transparent", () => {
 Deno.test("compose should be able to simplify applicative", () => {
   const app = partial(applicative);
   const f = partial(fmap);
-  const m = partial(mult);
+  const myfunction = (x: number, y: number) => {
+    return x * 2 * 5 / 20 + y / 5;
+  };
 
-  const a = unit(2);
-  const b = unit(4);
+  const a = 2;
+  const b = 4;
 
-  const multiplied = app(f(m)(a))(b);
+  const result = app(f(partial(myfunction))(unit(a)))(unit(b));
 
-  asserts.assertEquals(lift(multiplied), 2 * 4);
+  asserts.assertEquals(lift(result), myfunction(a, b));
 });
 
 Deno.test("showcase what partial applying functions is with compose", () => {
