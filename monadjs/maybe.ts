@@ -1,16 +1,19 @@
-export const Nothing = "nothing";
-export const Val = "val";
-export type Maybe<T> = { type: "val"; val: T } | { type: "nothing" };
+export const nothing = "nothing";
+export const something = "something";
+export type Something<T> = { type: "something"; val: T };
+export type Nothing = { type: "nothing" };
+
+export type Maybe<T> = Something<T> | Nothing;
 
 export function maybe<T>(x: T | undefined): Maybe<T> {
   if (x === undefined) {
-    return { type: Nothing };
+    return { type: nothing };
   }
-  return { type: Val, val: x };
+  return { type: something, val: x };
 }
 
 export function bind<T, U>(x: Maybe<T>, f: (x: T) => Maybe<U>): Maybe<U> {
-  if (x.type === Nothing) {
+  if (x.type === nothing) {
     return x;
   }
 
@@ -18,7 +21,7 @@ export function bind<T, U>(x: Maybe<T>, f: (x: T) => Maybe<U>): Maybe<U> {
 }
 
 export function fmap<T, U>(f: (x: T) => U, x: Maybe<T>): Maybe<U> {
-  if (x.type === Nothing) {
+  if (x.type === nothing) {
     return x;
   }
 
@@ -29,11 +32,11 @@ export function applicative<T, U>(
   f: Maybe<(x: T) => U>,
   x: Maybe<T>,
 ): Maybe<U> {
-  if (f.type === Nothing) {
+  if (f.type === nothing) {
     return f;
   }
 
-  if (x.type === Nothing) {
+  if (x.type === nothing) {
     return x;
   }
 

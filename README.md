@@ -1,7 +1,7 @@
 # MONADJS
 
-Some typescript code related to monads to help me learn what monads, functors and
-applicatives are.
+Some typescript code related to monads to help me learn what monads, functors
+and applicatives are.
 
 So far this implements a type-safe infinite list of Fibonacci numbers with the
 help of a Maybe monad, a Lazy monad and a LinkedList implemented with both.
@@ -71,7 +71,7 @@ Fibonacci numbers). As an experiment, we implement a LinkedList node being
 either a Node or the end of the list with the Maybe monad. Combing both the
 laziness and the optional value we get a definition of `Lazy<Maybe<Node<T>>>`.
 This means that a LinkedList is a promise to return a value that is either a
-empty list, `maybe.Nothing`, or a node with a next item.
+empty list, `maybe.nothing`, or a node with a next item.
 
 example:
 

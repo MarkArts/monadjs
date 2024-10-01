@@ -3,7 +3,7 @@ import * as maybe from "./maybe.ts";
 
 // LinkedList<T> is a linked list with a lazy tail
 // this means each element is a value with a "rest" value that is lazy
-// if the LinkedList is Maybe.Nothing it means the end of the list
+// if the LinkedList is maybe.nothing it means the end of the list
 export type LinkedList<T> = lazy.Lazy<
   maybe.Maybe<Node<T>>
 >;
@@ -27,7 +27,7 @@ export function linkedList<T>(x: T, xs?: LinkedList<T>): LinkedList<T> {
 }
 
 export function emptyLinkedList<T>(): LinkedList<T> {
-  return lazy.lazy({ type: maybe.Nothing });
+  return lazy.lazy({ type: maybe.nothing });
 }
 
 export function node<T>(x: T, xs: LinkedList<T>): Node<T> {
@@ -79,7 +79,7 @@ export function take<T>(
 
 export function linkedListToArray<T>(xs: LinkedList<T>): T[] {
   const list = lazy.lift(xs);
-  if (list.type === maybe.Nothing) {
+  if (list.type === maybe.nothing) {
     return [];
   }
   return [list.val.head, ...linkedListToArray(list.val.tail)];
@@ -100,7 +100,7 @@ export function lFold<T, U>(
   xs: LinkedList<T>,
 ): lazy.Lazy<U> {
   return lazy.bind(xs, (node) => {
-    if (node.type === maybe.Nothing) {
+    if (node.type === maybe.nothing) {
       return lazy.lazy(init);
     }
     return lFold(fn, fn(init, node.val.head), node.val.tail);
@@ -112,7 +112,7 @@ export function concat<T>(
   ys: LinkedList<T>,
 ): LinkedList<T> {
   return lazy.bind(xs, (lazyVal) => {
-    if (lazyVal.type === maybe.Nothing) {
+    if (lazyVal.type === maybe.nothing) {
       return ys;
     }
     return linkedList(lazyVal.val.head, concat(lazyVal.val.tail, ys));
@@ -125,7 +125,7 @@ export function flatten<T>(xss: LinkedList<LinkedList<T>>): LinkedList<T> {
     acc: LinkedList<T>,
   ): LinkedList<T> {
     return lazy.bind(current, (x) => {
-      if (x.type === maybe.Nothing) {
+      if (x.type === maybe.nothing) {
         return acc;
       }
       return concat(x.val.head, rec(x.val.tail, acc));
