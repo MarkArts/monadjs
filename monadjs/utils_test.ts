@@ -1,5 +1,5 @@
 import { asserts } from "../deps.ts";
-import { compose, mult, partial } from "./utils.ts";
+import { compose, partial } from "./utils.ts";
 
 import { applicative, fmap, lift, unit } from "./maybe.ts";
 
@@ -14,17 +14,20 @@ Deno.test("partial should be transparent", () => {
 });
 
 Deno.test("compose should be able to simplify applicative", () => {
+  // for compose to work we need partially applied functions of the basics
   const app = partial(applicative);
   const f = partial(fmap);
 
   const myfunction = (x: number, y: number) => {
-    return x * 2 * 5 / 20 + y / 5;
+    return (x * 2 * 5) / 20 + y / 5;
   };
+  const myf = partial(myfunction);
 
   const a = 2;
   const b = 4;
 
-  const result = app(f(partial(myfunction))(unit(a)))(unit(b));
+  // @ts-ignore typescript doesn't understand this
+  const result = compose([f(myf), app])(unit(a))(unit(b));
 
   asserts.assertEquals(lift(result), myfunction(a, b));
 });
@@ -43,14 +46,15 @@ Deno.test("showcase what partial applying functions is with compose", () => {
   asserts.equal(cooler(a)(b), 6);
 });
 
-Deno.test("compose should correctly chain a bunch of functions together", () => {
-  const add1times2minus3 = compose(
-    [
+Deno.test(
+  "compose should correctly chain a bunch of functions together",
+  () => {
+    const add1times2minus3 = compose([
       (x: number) => x + 1,
       (x: number) => x * 2,
       (x: number) => x - 3,
-    ],
-  );
+    ]);
 
-  asserts.equal(add1times2minus3(10), 17);
-});
+    asserts.equal(add1times2minus3(10), 17);
+  },
+);
