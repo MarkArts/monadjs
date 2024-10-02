@@ -2,7 +2,7 @@ import { CallCounter } from "./callCounter.ts";
 import { asserts } from "../deps.ts";
 import { applicative, bind, fmap, Lazy, lift, unit } from "./lazy.ts";
 import * as maybe from "./maybe.ts";
-import { partial } from "./utils.ts";
+import { compose, partial } from "./utils.ts";
 
 Deno.test("unit can handle functions and values", () => {
   const value = unit(2);
@@ -68,7 +68,10 @@ Deno.test("Can chain multiple lazy func with functor", () => {
 Deno.test("Can multiple 2 lazy values with applicative and functor", () => {
   const a = unit(2);
   const b = unit(4);
-  const mult = applicative(fmap((x) => (y: number) => x * y, a), b);
+  const mult = applicative(
+    fmap((x) => (y: number) => x * y, a),
+    b,
+  );
   console.log(mult);
   asserts.assertEquals(lift(mult), 2 * 4);
 });
@@ -119,46 +122,70 @@ Deno.test("Lazy doesn't run functions until lifted", () => {
 
   const result = lift(add);
   asserts.assertEquals(cc.count, 3);
-  asserts.assertEquals(result, (2 * 2) + 4);
+  asserts.assertEquals(result, 2 * 2 + 4);
 });
 
-Deno.test("Example of how using lazy with potential values save computation", () => {
-  const cc = new CallCounter();
+Deno.test(
+  "Example of how using lazy with potential values save computation",
+  () => {
+    const cc = new CallCounter();
 
-  // we have 2 values that might or might not exist
-  const userId = unit(maybe.nothing);
-  const newName = unit(maybe.unit("axel"));
+    const _applicative = partial(applicative);
+    const _fmap = partial(fmap);
 
-  // pretend this is an api call
-  const getUserInfo = fmap((id) =>
-    maybe.fmap((id) => {
+    const _applicativeMaybe = partial(maybe.applicative);
+    const _fmapMaybe = partial(maybe.fmap);
+
+    // we have 2 values that might or might not exist
+    const userId = unit(maybe.unit(1));
+    const newName = unit(maybe.nothing);
+
+    // pretend this is an api call
+    const getUserInfo = fmap(
+      (id) =>
+        maybe.fmap((id) => {
+          cc.count += 1;
+          return { name: "jhon doe", id: id };
+        }, id),
+      userId,
+    );
+    asserts.equal(cc.count, 0);
+
+    const updateName = (info: object) => (name: string) => {
       cc.count += 1;
-      return { name: "jhon doe", id: id };
-    }, id), userId);
+      return { ...info, name: name };
+    };
+    // @ts-ignore bad type inference
+    const updatenameMaybe = compose([
+      // @ts-ignore bad type inference
+      _fmapMaybe(updateName),
+      // @ts-ignore bad type inference
+      _applicativeMaybe,
+    ]);
 
-  // pretend this is another api call
-  const updatedName = applicative(
-    fmap((info) => (name: maybe.Maybe<string>) => {
-      cc.count += 1;
-      return maybe.applicative(
-        maybe.fmap((inf) => (n: string) => {
-          return { ...inf, name: n };
-        }, info),
-        name,
-      );
-    }, getUserInfo),
-    newName,
-  );
+    // @ts-ignore
+    const updateLazy: (
+      _: Lazy<maybe.Maybe<object>>,
+    ) => (_: Lazy<maybe.Maybe<string>>) => Lazy<maybe.Maybe<string>> = compose([
+      // @ts-ignore bad type inference
+      _fmap(updatenameMaybe),
+      //@ts-ignore bad type inference
+      _applicative,
+    ]);
 
-  asserts.equal(cc.count, 0);
+    // pretend this is another api call
+    const updatedName = updateLazy(getUserInfo)(newName);
 
-  // actually do something with the returned value triggering calcuations
-  const result = lift(updatedName);
-  if (result.type == maybe.nothingType) {
-    // there should be only 1 api call as getting the user info has succeeded
-    // but the updatename will have failed as the new name is nothing
-    asserts.assertEquals(cc.count, 1);
-  } else {
-    asserts.fail("updateName should not have succeeded in this test");
-  }
-});
+    asserts.equal(cc.count, 0);
+
+    // actually do something with the returned value triggering calcuations
+    const result = lift(updatedName);
+    if (result.type == maybe.nothingType) {
+      // there should be only 1 api call as getting the user info has succeeded
+      // but the updatename will have failed as the new name is nothing
+      asserts.assertEquals(cc.count, 1);
+    } else {
+      asserts.fail("updateName should not have succeeded in this test");
+    }
+  },
+);
