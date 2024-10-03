@@ -140,15 +140,12 @@ Deno.test(
     const userId = unit(maybe.unit(1));
     const newName = unit(maybe.nothing);
 
-    // pretend this is an api call
-    const getUserInfo = fmap(
-      (id) =>
-        maybe.fmap((id) => {
-          cc.count += 1;
-          return { name: "jhon doe", id: id };
-        }, id),
-      userId,
-    );
+    // @ts-ignore
+    const getUserInfo = compose([_fmapMaybe, _fmap])((id: number) => {
+      cc.count += 1;
+      return { name: "jhon doe", id: id };
+    })(userId);
+
     asserts.equal(cc.count, 0);
 
     const updateName = (info: object) => (name: string) => {
