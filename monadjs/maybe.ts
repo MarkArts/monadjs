@@ -21,14 +21,6 @@ export function bind<T, U>(x: Maybe<T>, f: (_: T) => Maybe<U>): Maybe<U> {
 // fmap is a functor that will apply a function to a value inside a Maybe
 // and in turn return that value as a maybe
 export function fmap<T, U>(f: (_: T) => U, x: Maybe<T>): Maybe<U> {
-  return bind(x, (val) => unit(f(val)));
-}
-
-// see: https://en.wikipedia.org/wiki/Applicative_functor
-export function fmapWithApplicative<T, U>(
-  f: (_: T) => U,
-  x: Maybe<T>,
-): Maybe<U> {
   return applicative(unit(f), x);
 }
 
