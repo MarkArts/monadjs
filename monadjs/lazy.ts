@@ -3,6 +3,7 @@
 //   2) a function that returns a lazy value
 // Having this circular type means we can chain promises of promises which
 // i promise wil not be the worst idea in this script
+// see: https://en.wikipedia.org/wiki/Lazy_evaluation
 export type Lazy<T> = { type: "val"; v: T } | {
   type: "func";
   v: () => Lazy<T>;
