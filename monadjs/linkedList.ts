@@ -4,9 +4,7 @@ import * as maybe from "./maybe.ts";
 // LinkedList<T> is a linked list with a lazy tail
 // this means each element is a value with a "rest" value that is lazy
 // if the LinkedList is maybe.nothing it means the end of the list
-export type LinkedList<T> = lazy.Lazy<
-  maybe.Maybe<Node<T>>
->;
+export type LinkedList<T> = lazy.Lazy<maybe.Maybe<Node<T>>>;
 export type Node<T> = {
   head: T;
   tail: LinkedList<T>;
@@ -14,15 +12,19 @@ export type Node<T> = {
 
 export function linkedList<T>(x: T, xs?: LinkedList<T>): LinkedList<T> {
   if (xs) {
-    return lazy.unit(maybe.unit({
-      head: x,
-      tail: xs,
-    }));
+    return lazy.unit(
+      maybe.unit({
+        head: x,
+        tail: xs,
+      }),
+    );
   } else {
-    return lazy.unit(maybe.unit({
-      head: x,
-      tail: emptyLinkedList(),
-    }));
+    return lazy.unit(
+      maybe.unit({
+        head: x,
+        tail: emptyLinkedList(),
+      }),
+    );
   }
 }
 
@@ -64,10 +66,7 @@ export function map<T, U>(xs: LinkedList<T>, fn: (v: T) => U): LinkedList<U> {
 // take should also return the tail of the linked list
 // not sure yet how i would accomplish that with fmap
 // or another construct
-export function take<T>(
-  xs: LinkedList<T>,
-  i: number,
-): LinkedList<T> {
+export function take<T>(xs: LinkedList<T>, i: number): LinkedList<T> {
   if (i <= 0) {
     return emptyLinkedList();
   }
@@ -107,10 +106,7 @@ export function lFold<T, U>(
   });
 }
 
-export function concat<T>(
-  xs: LinkedList<T>,
-  ys: LinkedList<T>,
-): LinkedList<T> {
+export function concat<T>(xs: LinkedList<T>, ys: LinkedList<T>): LinkedList<T> {
   return lazy.bind(xs, (lazyVal) => {
     if (lazyVal.type === maybe.nothingType) {
       return ys;
@@ -139,4 +135,20 @@ export function flatMap<T, U>(
   fn: (v: T) => LinkedList<U>,
 ): LinkedList<U> {
   return flatten(map(xs, fn));
+}
+
+export function head<T>(xs: LinkedList<T>): maybe.Maybe<T> {
+  const list = lazy.lift(xs);
+  if (list.type == maybe.nothingType) {
+    return maybe.nothing;
+  }
+  return maybe.unit(list.val.head);
+}
+
+export function tail<T>(xs: LinkedList<T>): maybe.Maybe<LinkedList<T>> {
+  const list = lazy.lift(xs);
+  if (list.type == maybe.nothingType) {
+    return maybe.nothing;
+  }
+  return maybe.unit(list.val.tail);
 }

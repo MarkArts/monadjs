@@ -55,28 +55,25 @@ Deno.test("Should be able to fold part of the infinite list", () => {
 
 Deno.test("fibonaci should return the correct sequence", () => {
   const fib = fibonaci();
-  asserts.assertEquals(linkedListToArray(take(fib, 8)), [
-    0,
-    1,
-    1,
-    2,
-    3,
-    5,
-    8,
-    13,
-  ]);
+  asserts.assertEquals(
+    linkedListToArray(take(fib, 8)),
+    [0, 1, 1, 2, 3, 5, 8, 13],
+  );
 });
 
-Deno.test("should be able to sum the first 8 numbers of fibonaci times 2", () => {
-  const cc = new CallCounter();
-  const fib = fibonaci();
-  const fib2 = map(fib, (x) => cc.call(() => x * 2));
-  asserts.assertEquals(cc.count, 0);
-  const sum = lFold((acc, c) => cc.call(() => acc + c), 0, take(fib2, 7));
-  asserts.assertEquals(cc.count, 0);
-  asserts.assertEquals(lift(sum), 40); // sum: [0*2, 1*2, 1*2, 2*2, 3*2, 5*2, 8*2] = [0,2,2,4,6,10,16]
-  asserts.assertEquals(cc.count, 7 + 7); // TODO: this currently triggers to many calculations
-});
+Deno.test(
+  "should be able to sum the first 8 numbers of fibonaci times 2",
+  () => {
+    const cc = new CallCounter();
+    const fib = fibonaci();
+    const fib2 = map(fib, (x) => cc.call(() => x * 2));
+    asserts.assertEquals(cc.count, 0);
+    const sum = lFold((acc, c) => cc.call(() => acc + c), 0, take(fib2, 7));
+    asserts.assertEquals(cc.count, 0);
+    asserts.assertEquals(lift(sum), 40); // sum: [0*2, 1*2, 1*2, 2*2, 3*2, 5*2, 8*2] = [0,2,2,4,6,10,16]
+    asserts.assertEquals(cc.count, 7 + 7); // TODO: this currently triggers to many calculations
+  },
+);
 
 Deno.test("Test example in Readme", () => {
   const cc = new CallCounter(); // this will keep track of actual excecution
@@ -109,10 +106,7 @@ Deno.test("Test example in Readme", () => {
   asserts.assertEquals(cc.count, 0); // verify no multiplications where made
   const result = lift(sumOfFirst5);
   asserts.assertEquals(cc.count, 10); // 3 multiplications in the first list, 2 in the second and 5 sums
-  asserts.assertEquals(
-    result,
-    14,
-  ); // sum of [1*2,2*2,3*2, 0*2,1*2] = 14
+  asserts.assertEquals(result, 14); // sum of [1*2,2*2,3*2, 0*2,1*2] = 14
 
   // The same codes without comments and the call counter adding syntax complexity
   const _l = map(arrayToLinkedList([1, 2, 3]), (x) => x * 2);
